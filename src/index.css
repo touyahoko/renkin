@@ -1,0 +1,121 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/geist";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+    --font-heading: var(--font-sans);
+    --font-sans: 'Geist Variable', sans-serif;
+    --color-ring: var(--ring);
+    --color-input: var(--input);
+    --color-border: var(--border);
+    --color-destructive: var(--destructive);
+    --color-warning: var(--warning);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-accent: var(--accent);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-muted: var(--muted);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-secondary: var(--secondary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-primary: var(--primary);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-popover: var(--popover);
+    --color-card-foreground: var(--card-foreground);
+    --color-card: var(--card);
+    --color-foreground: var(--foreground);
+    --color-background: var(--background);
+    --radius-sm: calc(var(--radius) * 0.6);
+    --radius-md: calc(var(--radius) * 0.8);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) * 1.4);
+    --radius-2xl: calc(var(--radius) * 1.8);
+    --radius-3xl: calc(var(--radius) * 2.2);
+    --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+    --background: oklch(0.995 0.003 260);
+    --foreground: oklch(0.145 0 0);
+    --card: oklch(0.982 0.006 260); /* 変更: 背景より少しだけ濃くして、カードと中の写真が浮かないようにする */
+    --card-foreground: oklch(0.145 0 0);
+    --popover: oklch(1 0.002 260);
+    --popover-foreground: oklch(0.145 0 0);
+    --primary: oklch(0.55 0.190 258);
+    --primary-foreground: oklch(0.985 0.010 260);
+    --secondary: oklch(0.965 0.008 260);
+    --secondary-foreground: oklch(0.22 0.020 260);
+    --muted: oklch(0.965 0.008 260);
+    --muted-foreground: oklch(0.52 0.020 260);
+    --accent: oklch(0.955 0.018 260);
+    --accent-foreground: oklch(0.22 0.020 260);
+    --destructive: oklch(0.577 0.245 27.325);
+    --warning: oklch(0.58 0.130 62);
+    --border: oklch(0.90 0.012 260);
+    --input: oklch(0.90 0.012 260);
+    --ring: oklch(0.65 0.150 258);
+    --radius: 0.625rem;
+}
+
+.dark {
+    --background: oklch(0.155 0.015 260);
+    --foreground: oklch(0.975 0.005 260);
+    --card: oklch(0.205 0.018 260);
+    --card-foreground: oklch(0.975 0.005 260);
+    --popover: oklch(0.205 0.018 260);
+    --popover-foreground: oklch(0.975 0.005 260);
+    --primary: oklch(0.65 0.180 255);
+    --primary-foreground: oklch(0.16 0.020 260);
+    --secondary: oklch(0.275 0.020 260);
+    --secondary-foreground: oklch(0.975 0.005 260);
+    --muted: oklch(0.275 0.020 260);
+    --muted-foreground: oklch(0.720 0.020 260);
+    --accent: oklch(0.305 0.028 260);
+    --accent-foreground: oklch(0.975 0.005 260);
+    --destructive: oklch(0.704 0.191 22.216);
+    --warning: oklch(0.80 0.135 75);
+    --border: oklch(0.80 0.05 260 / 14%);
+    --input: oklch(0.80 0.05 260 / 18%);
+    --ring: oklch(0.55 0.140 258);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    }
+  body {
+    @apply bg-background text-foreground;
+    }
+  html {
+    @apply font-sans;
+    }
+
+  /* Tailwind の Preflight が見出しの既定を消すうえ、shadcn は見出しの尺度を
+     持たない。場所ごとに書くと不揃いになるので、ここで 1 度だけ決める。
+     h1 ページの見出し / h2 その下の区切り / h3 カード内のまとまりの見出し。
+     カードの見出しは CardTitle (div) が持っていて、大きさは h1 と h3 の間にある */
+  h1 {
+    @apply font-heading text-2xl leading-tight font-semibold sm:text-3xl;
+    }
+  h2 {
+    @apply font-heading text-lg leading-snug font-semibold sm:text-xl;
+    }
+  h3 {
+    @apply font-heading text-sm leading-snug font-semibold;
+    }
+}
+/* 追加: 量のわからない処理 (写真の読み取り) の進捗のバー。左から右へ流れ続ける */
+@theme {
+  --animate-indeterminate: indeterminate 1.2s ease-in-out infinite;
+}
+
+@keyframes indeterminate {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(300%);
+  }
+}

@@ -1,0 +1,9 @@
+# wasm では SIMD (simd128) を使う。コードは普通の Rust のままで、コンパイラが自動で SIMD 命令にできる所を直す。
+# 浮動小数点の計算の順番は変えない (足し算をまとめ直すような最適化はしない) ので、結果は変わらない
+[target.wasm32-unknown-unknown]
+rustflags = ["-C", "target-feature=+simd128"]
+
+# wasm の中で e2e を流す (tests/charm_pics.rs)。ブラウザと同じく simd128 を使い、Node の WASI で動かす
+[target.wasm32-wasip1]
+rustflags = ["-C", "target-feature=+simd128"]
+runner = ["node", "--no-warnings", "tests/wasi-run.mjs"]

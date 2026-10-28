@@ -1,0 +1,38 @@
+[package]
+name = "renkin-reader"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+
+# ブラウザ用の入口 (src/wasm.rs) だけが使う。PC 上のテストや wasm32-wasip1 (wasm の e2e) では入らない
+[target.'cfg(all(target_arch = "wasm32", target_os = "unknown"))'.dependencies]
+wasm-bindgen = "0.2"
+serde-wasm-bindgen = "0.6"
+tsify = { version = "0.5.8", default-features = false, features = ["js"] }
+
+# build.rs が見本の PNG を展開するのに使う (wasm には入らない)
+[build-dependencies]
+png = "0.18"
+
+# テストのときだけ使う (wasm には入らない)。png は比べるデータの画像の読み込み、serde_json は正解の読み込み
+[dev-dependencies]
+png = "0.18"
+serde_json = { version = "1", features = ["float_roundtrip"] }
+# charm-pics の写真 (JPEG・PNG) を開く。ブラウザでは画像はブラウザが開くので、本体には入れない
+image = { version = "0.25", default-features = false, features = ["jpeg", "png"] }
+
+# テストでも SIFT などが遅くなりすぎないように、最適化して作る
+[profile.test]
+opt-level = 2
+
+[profile.release]
+lto = true
+
+[lints.clippy]
+# モジュールは vision.rs + vision/ の形にする (mod.rs は使わない)
+mod_module_files = "warn"

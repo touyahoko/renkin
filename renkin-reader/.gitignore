@@ -1,0 +1,7 @@
+/target
+
+# wasm-pack output
+/pkg
+
+# charm-pics の写真から作ったテストとベンチ用のデータ (tools/export_golden.py が書き出す。写真なので入れない)
+/tests/golden

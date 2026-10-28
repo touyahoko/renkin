@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#287deb" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="description" content="MHXX のマカ錬金の鑑定画面の写真から護石を読み取り、錬金時のフレームを特定します。写真はどこにも送られず、すべて手元の端末で処理されます。" />
+    <title>MHXX 鑑定スキャン</title>
+    <script>
+      // 最初の描画前にテーマを当てて、明るい画面が一瞬見えるのを防ぐ。
+      // キーと判定は src/lib/theme.ts と揃えること
+      try {
+        var stored = localStorage.getItem("mhxx-renkin-reader:theme") || "system";
+        var dark =
+          stored === "dark" ||
+          (stored === "system" && matchMedia("(prefers-color-scheme: dark)").matches);
+        document.documentElement.classList.toggle("dark", dark);
+        document.documentElement.style.colorScheme = dark ? "dark" : "light";
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

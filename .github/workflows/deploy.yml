@@ -1,0 +1,88 @@
+name: Deploy
+
+# v0.1.0 のようなタグを push したときだけ公開する。
+# ふだんは pnpm version patch でバージョンを上げてタグを作り、git push --follow-tags で送る
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同時に走らせない。進行中のものは打ち切る
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # 公開のタグと package.json のバージョンがずれないよう、食い違っていたら止める
+      - name: タグとバージョンが一致しているか確かめる
+        run: |
+          version="v$(node -p "require('./package.json').version")"
+          if [ "$version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::タグ $GITHUB_REF_NAME と package.json の $version が一致しません"
+            exit 1
+          fi
+
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: renkin-reader
+
+      # charm-pics を使うテスト (tests/charm_pics.rs) は #[ignore] なので流れない。
+      # リポジトリに入っている人工の画像 (tests/synthetic) とフィクスチャだけで確かめる
+      - name: Rust のテスト
+        working-directory: renkin-reader
+        run: cargo test --release
+
+      # アクション経由だと Node 20 依存になるので、公式の配布物を直接取る。
+      # 展開先の ~/.cargo/bin は rust-toolchain が PATH に入れている
+      - name: wasm-pack を入れる
+        env:
+          WASM_PACK: v0.15.0
+        run: |
+          curl -fsSL "https://github.com/wasm-bindgen/wasm-pack/releases/download/$WASM_PACK/wasm-pack-$WASM_PACK-x86_64-unknown-linux-musl.tar.gz" \
+            | tar -xz -C "$HOME/.cargo/bin" --strip-components=1 \
+              "wasm-pack-$WASM_PACK-x86_64-unknown-linux-musl/wasm-pack"
+          wasm-pack --version
+
+      # renkin-reader/pkg は git 管理外なので、フロントのビルドより先に作る (pnpm wasm と同じ)。
+      # SIMD (simd128) は renkin-reader/.cargo/config.toml で有効にしている
+      - name: wasm を作る
+        working-directory: renkin-reader
+        run: wasm-pack build --target web
+
+      # package.json に packageManager を書くと、pnpm 自身が依存として
+      # ロックファイルに載って肥大するので、ここで版を指定する
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 12.9.1
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm build
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
