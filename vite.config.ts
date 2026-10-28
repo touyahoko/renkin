@@ -52,7 +52,7 @@ function contentSecurityPolicy(): Plugin {
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => ({
   // GitHub Pages はリポジトリ名のサブパスで配信される。開発サーバーは / のままにしたいので分ける
-  base: mode === 'production' ? '/mhxx-renkin-reader/' : '/',
+  base: mode === 'production' ? '/renkin/' : '/',
   plugins: [react(), tailwindcss(), contentSecurityPolicy()],
   define: {
     __APP_VERSION__: JSON.stringify(version),
